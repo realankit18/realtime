@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chat Room</title>
+<link href="chat.css" rel="stylesheet"/>
+</head>
+<body>
+<div class="container">
+<!-- Chat Interface -->
+<div class="chat-container" id="chatContainer">
+<div class="chat-header">
+<div class="header-content">
+<div class="header-left">
+<div class="active-users">
+<svg class="icon" viewbox="0 0 24 24">
+<path d="M16,4C18.11,4 19.99,5.89 19.99,8C19.99,10.11 18.11,12 16,12C13.89,12 12,10.11 12,8C12,5.89 13.89,4 16,4M16,14C20.42,14 24,15.79 24,18V20H8V18C8,15.79 11.58,14 16,14M6,6H4V4H6V6M4,8H6V10H4V8M6,12H4V10H6V12M4,14H6V16H4V14M6,18H4V16H6V18M4,20H6V18H4V20Z"></path>
+</svg>
+<span class="active-users-count" id="activeUsersCount">0</span>
+</div>
+<div class="room-title">
+<h1 id="chatRoomName">Chat Room</h1>
+<div class="user-info" id="roomInfo">Connected as <span id="currentUsername"></span></div>
+</div>
+</div>
+<div class="header-right">
+<button class="leave-btn" onclick="leaveRoom()" title="Leave Room">
+<svg class="icon" viewbox="0 0 24 24">
+<path d="M17,7L15.59,8.41L18.17,11H8V13H18.17L15.59,15.59L17,17L22,12L17,7M4,5H12V3H4A2,2 0 0,0 2,5V19A2,2 0 0,0 4,21H12V19H4V5Z"></path>
+</svg>
+                            Leave
+                        </button>
+</div>
+</div>
+</div>
+<div class="messages-container" id="messagesContainer">
+<!-- Messages will be inserted here -->
+</div>
+<div class="typing-indicator" id="typingIndicator">
+<span id="typingText">Someone is typing</span>
+<div class="typing-dots">
+<span class="typing-dot"></span>
+<span class="typing-dot"></span>
+<span class="typing-dot"></span>
+</div>
+</div>
+<div class="input-area">
+<div class="reply-preview" id="replyPreview">
+<span class="close-reply" onclick="cancelReply()">×</span>
+<div id="replyContent"></div>
+</div>
+<div class="input-container">
+<textarea class="message-input" id="messageInput" placeholder="Type your message..." rows="1"></textarea>
+<input accept="image/*,video/*,.gif,.mp4,.mov,.avi,.mkv,.webm" class="file-input" id="fileInput" onchange="handleFileSelect(event)" type="file"/>
+<button class="action-btn file-btn" onclick="document.getElementById('fileInput').click()" title="Attach Media">
+<svg class="icon" viewbox="0 0 24 24">
+<path d="M16.5,6V17.5A4,4 0 0,1 12.5,21.5A4,4 0 0,1 8.5,17.5V5A2.5,2.5 0 0,1 11,2.5A2.5,2.5 0 0,1 13.5,5V15.5A1,1 0 0,1 12.5,16.5A1,1 0 0,1 11.5,15.5V6H10V15.5A2.5,2.5 0 0,0 12.5,18A2.5,2.5 0 0,0 15,15.5V5A4,4 0 0,0 11,1A4,4 0 0,0 7,5V17.5A5.5,5.5 0 0,0 12.5,23A5.5,5.5 0 0,0 18,17.5V6H16.5Z"></path>
+</svg>
+</button>
+<button class="action-btn send-btn" onclick="sendMessage()" title="Send Message">
+<svg class="icon" viewbox="0 0 24 24">
+<path d="M2,21L23,12L2,3V10L17,12L2,14V21Z"></path>
+</svg>
+</button>
+</div>
+<!-- Enhanced Upload Loading Indicator -->
+<div class="upload-loading" id="uploadLoading" style="display: none;">
+<div class="upload-progress">
+<div class="upload-spinner"></div>
+<span id="uploadStatusText">Preparing upload...</span>
+<div class="upload-progress-bar">
+<div class="upload-progress-fill" id="uploadProgressFill"></div>
+</div>
+<div class="upload-status-text" id="uploadSizeText">Processing file...</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Image Preview Modal -->
+<div class="image-preview" id="imagePreview">
+<span class="close-preview" onclick="closeImagePreview()" title="Close (Esc)">×</span>
+<img alt="Preview" id="previewImage" src=""/>
+</div>
+<!-- Username Input Modal -->
+<div class="modal" id="usernameModal" style="display: none;">
+<div class="modal-content">
+<h2>Join Chat Room</h2>
+<p style="margin-bottom: 24px; color: var(--text-secondary);">Enter your display name to join this room</p>
+<div class="form-group">
+<label>Your Display Name</label>
+<input id="usernameInput" placeholder="Enter your username" required="" type="text"/>
+<div class="error-message" id="usernameError" style="display: none;"></div>
+</div>
+<div class="modal-buttons">
+<button class="btn" onclick="submitUsername()" type="button">
+<svg class="icon" viewbox="0 0 24 24">
+<path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"></path>
+</svg>
+                    Join Room
+                </button>
+<button class="btn btn-secondary" onclick="goToHome()" type="button">
+<svg class="icon" viewbox="0 0 24 24">
+<path d="M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z"></path>
+</svg>
+                    Go Home
+                </button>
+</div>
+</div>
+</div>
+<!-- Confirmation Modal -->
+<div class="confirmation-modal" id="confirmationModal">
+<div class="confirmation-content">
+<h3>Leave Chat Room?</h3>
+<p>Are you sure you want to leave this chat room? You will be redirected to the home page.</p>
+<div class="confirmation-buttons">
+<button class="confirm-btn" onclick="confirmLeave()">Yes, Leave</button>
+<button class="cancel-btn" onclick="cancelLeave()">Cancel</button>
+</div>
+</div>
+</div>
+<!-- Edit Message Modal -->
+<div class="modal" id="editMessageModal" style="display: none;">
+<div class="modal-content">
+<h2>Edit Message</h2>
+<div class="form-group">
+<label>Message</label>
+<textarea id="editMessageInput" placeholder="Edit your message..." rows="3"></textarea>
+</div>
+<div class="modal-buttons">
+<button class="btn" onclick="confirmEdit()">
+<svg class="icon" viewbox="0 0 24 24">
+<path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,14L6,9L7.41,7.59L11,11.17L16.59,5.58L18,7L11,14Z"></path>
+</svg>
+                    Save Changes
+                </button>
+<button class="btn btn-secondary" onclick="cancelEdit()">
+<svg class="icon" viewbox="0 0 24 24">
+<path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"></path>
+</svg>
+                    Cancel
+                </button>
+</div>
+</div>
+</div>
+<!-- Delete Message Modal -->
+<div class="confirmation-modal" id="deleteMessageModal">
+<div class="confirmation-content">
+<h3>Delete Message?</h3>
+<p>Are you sure you want to delete this message? This action cannot be undone.</p>
+<div class="confirmation-buttons">
+<button class="confirm-btn" onclick="confirmDelete()">Delete</button>
+<button class="cancel-btn" onclick="cancelDelete()">Cancel</button>
+</div>
+</div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="chat.js"></script>
+</body>
+</html>
